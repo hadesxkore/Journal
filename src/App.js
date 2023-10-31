@@ -37,13 +37,24 @@ function App() {
     }
 
     try {
+      const timestamp = new Date(); // Get the current date and time
       const docRef = await addDoc(collection(db, 'Journal'), {
         title: dreamTitle,
         description: dreamDescription,
-        timestamp: new Date(),
+        timestamp: timestamp, // Include the timestamp in the entry
         nickname: nickname, // Store the user's nickname with the dream entry
       });
-      setDreams([...dreams, { id: docRef.id, title: dreamTitle, description: dreamDescription, nickname: nickname }]);
+
+      setDreams([
+        ...dreams,
+        {
+          id: docRef.id,
+          title: dreamTitle,
+          description: dreamDescription,
+          nickname: nickname,
+          timestamp: timestamp, // Add the timestamp to the new dream entry
+        },
+      ]);
       setDreamTitle('');
       setDreamDescription('');
       setErrorMessage('');
@@ -114,6 +125,10 @@ function App() {
                 <h2 className="text-xl font-semibold text-blue-500">{dream.title}</h2>
                 <p className="mt-2 text-gray-600">{dream.description}</p>
                 <p className="mt-2 text-gray-500">By: {dream.nickname}</p> {/* Display the user's nickname */}
+                <p className="mt-2 text-gray-500"><p className="mt-2 text-gray-500">
+  Date: {dream.timestamp.toLocaleString('en-PH')}
+</p>
+</p> {/* Display the timestamp */}
               </div>
               <button
                 className="text-red-600 hover:text-red-800 cursor-pointer"
