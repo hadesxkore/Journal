@@ -79,7 +79,7 @@ function App() {
   
     try {
       const timestamp = serverTimestamp();
-      const docRef = await addDoc(collection(db, 'Dreams'), {
+      await addDoc(collection(db, 'Dreams'), {
         title: dreamTitle,
         description: dreamDescription,
         timestamp: timestamp,
@@ -210,47 +210,48 @@ function App() {
         </div>
 
         {/* User's nickname input field */}
-       {/* User's nickname input field */}
-       <input
+        <input
           type="text"
           placeholder="Your Nickname"
-          className="border-2 p-3 rounded w-full mb-4 animate-pulse"
+          className="border p-3 rounded w-full mb-4 animate-pulse"
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
           disabled={!user} // Disable the input field if no user is logged in
         />
-{/* Dream entry form */}
-<div className="bg-white p-6 rounded-lg shadow-lg mb-4 animate-fade-in">
-  <input
-    type="text"
-    placeholder="Dream Title"
-    className="border p-3 rounded w-full"
-    value={dreamTitle}
-    onChange={(e) => setDreamTitle(e.target.value)}
-    disabled={!user} // Disable the input field if no user is logged in
-  />
-  <textarea
-    placeholder="Dream Description"
-    className="border p-3 rounded w-full mt-3"
-    value={dreamDescription}
-    onChange={(e) => setDreamDescription(e.target.value)}
-    disabled={!user} // Disable the input field if no user is logged in
-  />
-  <button
-    className="bg-blue-500 text-white py-3 px-6 rounded-full w-full mt-3 hover-bg-blue-600 transition-all duration-300"
-    onClick={addDream}
-    disabled={!user} // Disable the button if no user is logged in
-  >
-    Share Dream
-  </button>
-  {errorMessage && (
-    <p className="text-red-600 mt-2">{errorMessage}</p>
-  )}
-</div>
+
+        {/* Dream entry form */}
+        <div className="bg-white p-6 rounded-lg shadow-lg mb-4 animate-fade-in">
+          <input
+            type="text"
+            placeholder="Dream Title"
+            className="border p-3 rounded w-full"
+            value={dreamTitle}
+            onChange={(e) => setDreamTitle(e.target.value)}
+            disabled={!user} // Disable the input field if no user is logged in
+          />
+          <textarea
+            placeholder="Dream Description"
+            className="border p-3 rounded w-full mt-3"
+            value={dreamDescription}
+            onChange={(e) => setDreamDescription(e.target.value)}
+            disabled={!user} // Disable the input field if no user is logged in
+          />
+          <button
+            className="bg-blue-500 text-white py-3 px-6 rounded-full w-full mt-3 hover-bg-blue-600 transition-all duration-300"
+            onClick={addDream}
+            disabled={!user} // Disable the button if no user is logged in
+          >
+            Share Dream
+          </button>
+          {errorMessage && (
+            <p className="text-red-600 mt-2">{errorMessage}</p>
+          )}
+        </div>
+
         {/* List of dream entries with comments */}
         <div className="space-y-4">
           {dreams.map((dream) => (
-            <div key={dream.id} className="bg-white p-4 rounded-lg shadow-md animation-fade-in">
+            <div key={dream.id} className="bg-white p-4 rounded-lg shadow-md animate-fade-in">
               <div>
                 <h2 className="text-xl font-semibold text-blue-500">{dream.title}</h2>
                 <p className="mt-2 text-gray-600">{dream.description}</p>
