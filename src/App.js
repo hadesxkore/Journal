@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db, auth } from './firebase'; // Import your Firebase configuration and auth
+import { db, auth } from './firebase';
 import {
   collection,
   addDoc,
@@ -11,7 +11,7 @@ import {
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 
 function App() {
-  const [user, setUser] = useState(null); // To store the logged-in user
+  const [user, setUser] = useState(null);
   const [dreams, setDreams] = useState([]);
   const [dreamTitle, setDreamTitle] = useState('');
   const [dreamDescription, setDreamDescription] = useState('');
@@ -182,13 +182,78 @@ function App() {
     });
   }, []);
 
+  // Render dream entries only if a user is logged in
+  const renderDreamEntries = () => {
+    if (!user) {
+      return (
+        <p className="text-white">Please log in to see dream entries.</p>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {dreams.map((dream) => (
+          <div key={dream.id} className="bg-white p-4 rounded-lg shadow-md animate-fade-in">
+            <div>
+              <h2 className="text-xl font-semibold text-blue-500">{dream.title}</h2>
+              <p className="mt-2 text-gray-600">{dream.description}</p>
+              <p className="mt-2 text-gray-500">By: {dream.nickname}</p>
+              <p className="mt-2 text-gray-500">Date: {dream.timestamp.toLocaleString('en-PH')}</p>
+            </div>
+            {dream.comments.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold mt-4">Comments:</h3>
+                {dream.comments.map((comment) => (
+                  <div key={comment.id} className="mt-2">
+                    <p className="text-gray-600">{comment.text}</p>
+                    <p className="mt-1 text-gray-500">
+                      By: {comment.nickname} | Date: {comment.timestamp.toLocaleString('en-PH')}
+                    </p>
+                    <button
+                      className="text-red-600 hover:text-red-800 cursor-pointer mt-2"
+                      onClick={() => deleteComment(dream.id, comment.id)}
+                    >
+                      Delete Comment
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="mt-4">
+              <textarea
+                placeholder="Add a comment"
+                className="border p-3 rounded w-full"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+              />
+              <button
+                className="bg-blue-500 text-white py-2 px-4 rounded-full mt-2 hover-bg-blue-600 transition-all duration-300"
+                onClick={() => addComment(dream.id)}
+              >
+                Add Comment
+              </button>
+              {errorMessage && (
+                <p className="text-red-600 mt-2">{errorMessage}</p>
+              )}
+            </div>
+            <button
+              className="text-red-600 hover:text-red-800 cursor-pointer mt-4"
+              onClick={() => deleteDream(dream.id)}
+            >
+              Delete Dream
+            </button>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-400 to-pink-500">
       <div className="container mx-auto p-4 animate-fade-in">
         <h1 className="text-3xl font-semibold text-white mb-4">My Dream Journal</h1>
         <div className="mb-4">
           {user ? (
-            // Show user info and logout button if a user is logged in
             <div>
               <p className="text-white">Welcome, {user.displayName}</p>
               <button
@@ -199,7 +264,6 @@ function App() {
               </button>
             </div>
           ) : (
-            // Show login button if no user is logged in
             <button
               onClick={handleLogin}
               className="bg-blue-600 text-white py-2 px-4 rounded-full hover:bg-blue-800 transition-all duration-300"
@@ -209,17 +273,15 @@ function App() {
           )}
         </div>
 
-        {/* User's nickname input field */}
         <input
           type="text"
           placeholder="Your Nickname"
           className="border p-3 rounded w-full mb-4 animate-pulse"
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
-          disabled={!user} // Disable the input field if no user is logged in
+          disabled={!user}
         />
 
-        {/* Dream entry form */}
         <div className="bg-white p-6 rounded-lg shadow-lg mb-4 animate-fade-in">
           <input
             type="text"
@@ -227,19 +289,19 @@ function App() {
             className="border p-3 rounded w-full"
             value={dreamTitle}
             onChange={(e) => setDreamTitle(e.target.value)}
-            disabled={!user} // Disable the input field if no user is logged in
+            disabled={!user}
           />
           <textarea
             placeholder="Dream Description"
             className="border p-3 rounded w-full mt-3"
             value={dreamDescription}
             onChange={(e) => setDreamDescription(e.target.value)}
-            disabled={!user} // Disable the input field if no user is logged in
+            disabled={!user}
           />
           <button
             className="bg-blue-500 text-white py-3 px-6 rounded-full w-full mt-3 hover-bg-blue-600 transition-all duration-300"
             onClick={addDream}
-            disabled={!user} // Disable the button if no user is logged in
+            disabled={!user}
           >
             Share Dream
           </button>
@@ -248,61 +310,8 @@ function App() {
           )}
         </div>
 
-        {/* List of dream entries with comments */}
-        <div className="space-y-4">
-          {dreams.map((dream) => (
-            <div key={dream.id} className="bg-white p-4 rounded-lg shadow-md animate-fade-in">
-              <div>
-                <h2 className="text-xl font-semibold text-blue-500">{dream.title}</h2>
-                <p className="mt-2 text-gray-600">{dream.description}</p>
-                <p className="mt-2 text-gray-500">By: {dream.nickname}</p>
-                <p className="mt-2 text-gray-500">Date: {dream.timestamp.toLocaleString('en-PH')}</p>
-              </div>
-              {dream.comments.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mt-4">Comments:</h3>
-                  {dream.comments.map((comment) => (
-                    <div key={comment.id} className="mt-2">
-                      <p className="text-gray-600">{comment.text}</p>
-                      <p className="mt-1 text-gray-500">
-                        By: {comment.nickname} | Date: {comment.timestamp.toLocaleString('en-PH')}
-                      </p>
-                      <button
-                        className="text-red-600 hover:text-red-800 cursor-pointer mt-2"
-                        onClick={() => deleteComment(dream.id, comment.id)}
-                      >
-                        Delete Comment
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="mt-4">
-                <textarea
-                  placeholder="Add a comment"
-                  className="border p-3 rounded w-full"
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                />
-                <button
-                  className="bg-blue-500 text-white py-2 px-4 rounded-full mt-2 hover-bg-blue-600 transition-all duration-300"
-                  onClick={() => addComment(dream.id)}
-                >
-                  Add Comment
-                </button>
-                {errorMessage && (
-                  <p className="text-red-600 mt-2">{errorMessage}</p>
-                )}
-              </div>
-              <button
-                className="text-red-600 hover:text-red-800 cursor-pointer mt-4"
-                onClick={() => deleteDream(dream.id)}
-              >
-                Delete Dream
-              </button>
-            </div>
-          ))}
-        </div>
+        {renderDreamEntries()}
+
       </div>
     </div>
   );
